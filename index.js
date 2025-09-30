@@ -5,13 +5,12 @@ const LocalSession = require("telegraf-session-local");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// Use session to track user state (adding tasks)
+
 bot.use(new LocalSession({ database: "session_db.json" }).middleware());
 
-// Store tasks per user (in memory for now)
 const userTasks = {};
 
-// Helper: show main menu as persistent keyboard
+
 function showMenu(ctx) {
     return ctx.reply(
         "📌 Main Menu — What would you like to do?",
@@ -20,11 +19,11 @@ function showMenu(ctx) {
             ["⏰ View Reminders", "❌ Clear All"]
         ])
             .resize()
-            .oneTime(false) // persistent keyboard
+            .oneTime(false) 
     );
 }
 
-// Start command
+
 bot.start((ctx) => {
     const userId = ctx.from.id;
     if (!userTasks[userId]) userTasks[userId] = [];
@@ -34,14 +33,14 @@ bot.start((ctx) => {
     showMenu(ctx);
 });
 
-// Handle user text messages (menu or adding tasks)
+
 bot.on("text", (ctx) => {
     const userId = ctx.from.id;
     if (!userTasks[userId]) userTasks[userId] = [];
 
     const text = ctx.message.text;
 
-    // Menu actions
+    
     if (text === "➕ Add Task") {
         ctx.session.state = "adding_task";
         return ctx.reply("✍️ Send me the task you want to add (optionally include 'at HH:MM' to set a reminder):");
@@ -70,9 +69,9 @@ bot.on("text", (ctx) => {
         return ctx.reply("🗑️ All tasks cleared!");
     }
 
-    // Adding a task
+    
     if (ctx.session.state === "adding_task") {
-        // Parse reminder time "at HH:MM"
+    
         let match = text.match(/at (\d{1,2}):(\d{2})/);
         let reminderTime = null;
         if (match) reminderTime = { hour: parseInt(match[1]), minute: parseInt(match[2]) };
@@ -95,10 +94,10 @@ bot.on("text", (ctx) => {
         return;
     }
 
-    // Fallback for unknown text
+    
     ctx.reply("⚠️ I didn't understand that. Please choose an option from the menu.");
 });
 
-// Launch bot
+
 bot.launch();
 console.log("🚀 Task Manager Bot running...");
